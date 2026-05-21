@@ -3,6 +3,7 @@ import { Line, Stars } from "@react-three/drei";
 import {
   ArrowLeft,
   ArrowDownToLine,
+  ArrowRight,
   CircleDot,
   Compass,
   DoorOpen,
@@ -29,7 +30,7 @@ import { createPanelTexture } from "./panelTexture";
 
 const scrollPages = chapters.length;
 const cameraDistance = 8.4;
-const roomDistance = 10.5;
+const roomOffset = 9.6;
 
 type RouteState = {
   index: number;
@@ -61,6 +62,8 @@ export default function App() {
   const displayBody = portalChapter
     ? portalChapter.room.summary
     : activeChapter.body;
+  const roomSideLabel =
+    activeChapter.side === "left" ? "Turn left" : "Turn right";
 
   const jumpTo = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
     const maxScroll =
@@ -212,7 +215,10 @@ export default function App() {
         </button>
       </header>
 
-      <aside className="readout" aria-live="polite">
+      <aside
+        className={portalChapter ? "readout is-room" : "readout"}
+        aria-live="polite"
+      >
         <div className="readout-kicker">
           <Layers3 size={17} />
           <span>{displayKicker}</span>
@@ -235,8 +241,12 @@ export default function App() {
               onClick={() => enterRoom(activeChapter)}
               type="button"
             >
-              <DoorOpen size={18} />
-              <span>Enter room</span>
+              {activeChapter.side === "left" ? (
+                <ArrowLeft size={18} />
+              ) : (
+                <ArrowRight size={18} />
+              )}
+              <span>{roomSideLabel}</span>
             </button>
           )}
         </div>
@@ -260,6 +270,8 @@ export default function App() {
         onJump={goToChapter}
         portalChapter={portalChapter}
       />
+
+      {portalChapter && <RoomPage chapter={portalChapter} onExit={exitRoom} />}
 
       <div className="depth-meter" aria-hidden="true">
         <Compass size={18} />
@@ -333,8 +345,9 @@ function DepthMap({
   const points = useMemo(
     () =>
       chapters.map((chapter) => ({
-        x: 50 + chapter.position[0] * 6.4,
-        y: 10 + Math.abs(chapter.position[2]) * 0.96,
+        x: 50,
+        y: 9 + Math.abs(chapter.position[2]) * 1.02,
+        branchX: chapter.side === "left" ? 24 : 76,
       })),
     [],
   );
@@ -359,9 +372,9 @@ function DepthMap({
             <line
               className="map-branch"
               x1={points[activeRoomIndex].x}
-              x2={points[activeRoomIndex].x + 18}
+              x2={points[activeRoomIndex].branchX}
               y1={points[activeRoomIndex].y}
-              y2={points[activeRoomIndex].y - 6}
+              y2={points[activeRoomIndex].y}
             />
           )}
         </svg>
@@ -387,9 +400,134 @@ function DepthMap({
         type="button"
       >
         {portalChapter ? <ArrowLeft size={16} /> : <DoorOpen size={16} />}
-        <span>{portalChapter ? "Main path" : "Open room"}</span>
+        <span>
+          {portalChapter
+            ? "Main path"
+            : activeChapter.side === "left"
+              ? "Open left room"
+              : "Open right room"}
+        </span>
       </button>
     </aside>
+  );
+}
+
+function RoomPage({
+  chapter,
+  onExit,
+}: {
+  chapter: Chapter;
+  onExit: () => void;
+}) {
+  return (
+    <section className={`room-page room-page--${chapter.side}`}>
+      <header className="room-page-header">
+        <div>
+          <p>{chapter.kicker} / {chapter.side} room</p>
+          <h2>{chapter.room.title}</h2>
+        </div>
+        <button
+          aria-label="Return to corridor"
+          className="room-page-close"
+          onClick={onExit}
+          title="Return to corridor"
+          type="button"
+        >
+          <ArrowLeft size={18} />
+        </button>
+      </header>
+
+      <div className="room-page-body">
+        <div className="room-page-summary">
+          <span>{chapter.room.kind}</span>
+          <p>{chapter.room.summary}</p>
+        </div>
+
+        <div className={`room-content-grid room-content-grid--${chapter.room.kind}`}>
+          {chapter.room.sections.map((section) => (
+            <article className="room-card" key={section.title}>
+              <span>{section.eyebrow}</span>
+              <h3>{section.title}</h3>
+              <p>{section.body}</p>
+            </article>
+          ))}
+        </div>
+
+        <RoomWorkbench chapter={chapter} />
+
+        <nav className="room-local-nav" aria-label={`${chapter.room.title} sections`}>
+          {["Overview", "Objects", "Activity", "Settings"].map((label) => (
+            <button key={label} type="button">
+              <span>{label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </section>
+  );
+}
+
+function RoomWorkbench({ chapter }: { chapter: Chapter }) {
+  if (chapter.room.kind === "dashboard") {
+    return (
+      <div className="room-workbench room-workbench--dashboard">
+        <div className="metric-tile">
+          <span>Latency</span>
+          <strong>42ms</strong>
+        </div>
+        <div className="metric-tile">
+          <span>Agents</span>
+          <strong>18</strong>
+        </div>
+        <div className="metric-tile">
+          <span>Risk</span>
+          <strong>Low</strong>
+        </div>
+        <div className="trace-list">
+          <p>Recent signal</p>
+          <span>Build passed</span>
+          <span>Memory indexed</span>
+          <span>UI branch active</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (chapter.room.kind === "archive") {
+    return (
+      <div className="room-workbench room-workbench--archive">
+        {["Design notes", "Run logs", "Screenshots", "Research", "Decisions", "Drafts"].map(
+          (label) => (
+            <button key={label} type="button">
+              <span>{label}</span>
+            </button>
+          ),
+        )}
+      </div>
+    );
+  }
+
+  if (chapter.room.kind === "workbench") {
+    return (
+      <div className="room-workbench room-workbench--tools">
+        {["Canvas", "Prompt", "Preview", "Diff"].map((label, index) => (
+          <div className="tool-column" key={label}>
+            <span>{label}</span>
+            <div style={{ height: `${72 + index * 28}px` }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="room-workbench">
+      <p>
+        Spatial meaning hypothesis: the corridor is global context, rooms are
+        bounded work modes, and side direction can encode what kind of thinking
+        the user is doing.
+      </p>
+    </div>
   );
 }
 
@@ -487,8 +625,9 @@ function CameraRig({
 
     if (portalChapter) {
       const [x, y, z] = portalChapter.position;
-      target.set(x, y - 0.15, z - 2.8);
-      lookAt.set(x, y - 0.15, z - roomDistance);
+      const side = portalChapter.side === "right" ? 1 : -1;
+      target.set(x + side * 2.2, y - 0.1, z + 0.25);
+      lookAt.set(x + side * roomOffset, y - 0.1, z);
     } else {
       target.set(current.x, current.y, current.z + responsiveDistance);
       lookAt.set(current.x, current.y, current.z);
@@ -591,9 +730,13 @@ function PortalGlyph({ chapter }: { chapter: Chapter }) {
 
 function PortalRoom({ chapter }: { chapter: Chapter }) {
   const [x, y, z] = chapter.position;
+  const side = chapter.side === "right" ? 1 : -1;
 
   return (
-    <group position={[x, y, z - roomDistance]}>
+    <group
+      position={[x + side * roomOffset, y, z]}
+      rotation={[0, -side * Math.PI * 0.5, 0]}
+    >
       <mesh position={[0, 0, -0.24]}>
         <planeGeometry args={[13.4, 8.2]} />
         <meshStandardMaterial

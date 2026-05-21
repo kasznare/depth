@@ -4,8 +4,9 @@ A React and Three.js prototype for a site that scrolls into the page instead of 
 
 ## Spatial Model
 
-- The main path is scroll-driven and follows the chapter stack in depth.
-- Each chapter has an inner room that can be opened from the readout or depth map.
+- The main path is a straight scroll-driven corridor through top-level software areas.
+- Each chapter has a left or right room; entering a room turns the camera sideways instead of zooming deeper.
+- Rooms are bounded work surfaces: once inside, the 3D depth stops and the room page scrolls normally.
 - Hash routes are shareable: `#signal` opens the corridor at a chapter, and `#signal/room` opens that chapter's room.
 - Escape, the close button, or the map's main-path button returns from a room to the corridor.
 
