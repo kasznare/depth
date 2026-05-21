@@ -1,0 +1,27 @@
+{
+  "name": "depth-scroll-experiment",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/build.mjs --mode=development && node scripts/serve.mjs",
+    "build": "tsc -b && node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "latest",
+    "@react-three/fiber": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "three": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/three": "latest",
+    "esbuild-wasm": "^0.28.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.11.0"
+}
