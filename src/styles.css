@@ -65,7 +65,6 @@ button {
 .brand,
 .chapter-nav,
 .icon-button,
-.readout,
 .room-close,
 .depth-map,
 .depth-meter {
@@ -157,17 +156,19 @@ button {
 
 .readout {
   position: fixed;
-  z-index: 3;
-  left: 28px;
-  bottom: 28px;
-  width: min(440px, calc(100vw - 56px));
-  padding: 20px 22px 22px;
+  z-index: 2;
+  top: 82px;
+  left: 18px;
+  width: min(320px, calc(100vw - 36px));
+  padding: 13px 14px 14px;
   color: #fff8e8;
   background: rgba(18, 16, 13, 0.68);
   border: 1px solid rgba(255, 248, 232, 0.18);
   border-radius: 8px;
   box-shadow: 0 22px 72px rgba(0, 0, 0, 0.36);
   backdrop-filter: blur(22px);
+  pointer-events: none;
+  display: none;
 }
 
 .readout-kicker {
@@ -184,27 +185,222 @@ button {
 
 .readout h1 {
   margin: 0;
-  max-width: 11ch;
-  font-size: clamp(2.4rem, 5vw, 4.9rem);
-  line-height: 0.94;
+  max-width: none;
+  font-size: 1.16rem;
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
 .readout p {
-  margin: 16px 0 0;
-  max-width: 34rem;
-  color: rgba(255, 248, 232, 0.78);
-  font-size: clamp(1rem, 1.35vw, 1.16rem);
+  display: none;
 }
 
 .readout.is-room {
   display: none;
 }
 
+.corridor-html-wrap {
+  pointer-events: auto;
+}
+
+.corridor-page {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 18px;
+  width: 860px;
+  height: 520px;
+  padding: 34px 38px;
+  overflow: hidden;
+  color: var(--ink);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.2)),
+    var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.46);
+  pointer-events: none;
+  opacity: 0.72;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.corridor-page::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background: var(--accent);
+  content: "";
+}
+
+.corridor-page.is-active {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.corridor-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  min-width: 0;
+}
+
+.corridor-page-header p {
+  margin: 0 0 9px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.corridor-page-header h2 {
+  margin: 0;
+  max-width: 12ch;
+  font-size: 3.1rem;
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.corridor-side {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 8px 12px;
+  color: var(--surface);
+  background: var(--ink);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.corridor-page-copy {
+  max-width: 45rem;
+  margin: 0;
+  color: color-mix(in srgb, var(--ink) 76%, transparent);
+  font-size: 1.04rem;
+  line-height: 1.45;
+}
+
+.corridor-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  min-height: 0;
+}
+
+.corridor-mini-panel {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  min-height: 138px;
+  padding: 15px;
+  color: var(--ink);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(17, 16, 15, 0.18);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.corridor-mini-panel span {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.corridor-mini-panel strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 1.02rem;
+  line-height: 1.14;
+  overflow-wrap: anywhere;
+}
+
+.corridor-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.corridor-primary,
+.corridor-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 43px;
+  padding: 0 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 900;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.corridor-primary {
+  color: var(--surface);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.corridor-secondary {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(17, 16, 15, 0.22);
+}
+
+.corridor-mini-panel:hover,
+.corridor-mini-panel:focus-visible,
+.corridor-primary:hover,
+.corridor-primary:focus-visible,
+.corridor-secondary:hover,
+.corridor-secondary:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.corridor-mini-panel:hover,
+.corridor-mini-panel:focus-visible,
+.corridor-secondary:hover,
+.corridor-secondary:focus-visible {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.corridor-primary:hover,
+.corridor-primary:focus-visible {
+  color: var(--ink);
+  background: var(--accent);
+}
+
+.corridor-mini-panel:disabled,
+.corridor-primary:disabled,
+.corridor-secondary:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
 .readout-actions {
   display: flex;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 10px;
+  pointer-events: auto;
 }
 
 .primary-action,
@@ -630,25 +826,55 @@ button {
   }
 
   .readout {
+    top: 118px;
     left: 12px;
     right: 12px;
-    bottom: 14px;
+    bottom: auto;
     width: auto;
-    padding: 16px;
+    padding: 12px;
   }
 
   .readout h1 {
-    max-width: 12ch;
-    font-size: clamp(2.1rem, 12vw, 3.8rem);
+    max-width: none;
+    font-size: 1.04rem;
   }
 
   .readout p {
-    margin-top: 12px;
-    font-size: 0.98rem;
+    display: none;
   }
 
   .readout-actions {
     margin-top: 14px;
+  }
+
+  .corridor-page {
+    width: 720px;
+    height: 540px;
+    gap: 14px;
+    padding: 28px;
+  }
+
+  .corridor-page-header h2 {
+    font-size: 2.55rem;
+  }
+
+  .corridor-page-copy {
+    font-size: 0.98rem;
+  }
+
+  .corridor-panel-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .corridor-mini-panel {
+    min-height: 74px;
+    padding: 12px;
+  }
+
+  .corridor-page-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .room-close {
@@ -697,7 +923,11 @@ button {
   .icon-button,
   .primary-action,
   .map-room-button,
-  .room-page-close {
+  .room-page-close,
+  .corridor-page,
+  .corridor-mini-panel,
+  .corridor-primary,
+  .corridor-secondary {
     transition: none;
   }
 }

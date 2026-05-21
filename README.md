@@ -5,6 +5,7 @@ A React and Three.js prototype for a site that scrolls into the page instead of 
 ## Spatial Model
 
 - The main path is a straight scroll-driven corridor through top-level software areas.
+- Corridor panels are real DOM pages mounted into the 3D scene, so the visible cards and actions are clickable instead of baked into textures.
 - Each chapter has a left or right room; entering a room turns the camera sideways instead of zooming deeper.
 - Rooms are bounded work surfaces: once inside, the 3D depth stops and the room page scrolls normally.
 - Hash routes are shareable: `#signal` opens the corridor at a chapter, and `#signal/room` opens that chapter's room.

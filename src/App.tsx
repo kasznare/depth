@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Line, Stars } from "@react-three/drei";
+import { Html, Line, Stars } from "@react-three/drei";
 import {
   ArrowLeft,
   ArrowDownToLine,
@@ -24,9 +24,9 @@ import {
   Points,
   Vector3,
 } from "three";
+import type { CSSProperties } from "react";
 import type { Group } from "three";
 import { chapters, type Chapter } from "./chapters";
-import { createPanelTexture } from "./panelTexture";
 
 const scrollPages = chapters.length;
 const cameraDistance = 8.4;
@@ -36,6 +36,9 @@ type RouteState = {
   index: number;
   isRoom: boolean;
 };
+
+type CorridorPageStyle = CSSProperties &
+  Record<"--accent" | "--ink" | "--surface", string>;
 
 export default function App() {
   const initialRoute = useMemo(() => parseHashRoute(), []);
@@ -167,9 +170,11 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <div className="scene-layer" aria-hidden="true">
+      <div className="scene-layer">
         <DepthScene
           activeIndex={activeIndex}
+          onEnter={enterRoom}
+          onJump={goToChapter}
           portalChapter={portalChapter}
           progress={progress}
         />
@@ -563,11 +568,19 @@ function useScrollProgress() {
 
 type DepthSceneProps = {
   activeIndex: number;
+  onEnter: (chapter?: Chapter) => void;
+  onJump: (index: number) => void;
   portalChapter: Chapter | null;
   progress: number;
 };
 
-function DepthScene({ activeIndex, portalChapter, progress }: DepthSceneProps) {
+function DepthScene({
+  activeIndex,
+  onEnter,
+  onJump,
+  portalChapter,
+  progress,
+}: DepthSceneProps) {
   return (
     <Canvas
       camera={{ fov: 45, position: [0, 0, cameraDistance], near: 0.1, far: 150 }}
@@ -599,6 +612,8 @@ function DepthScene({ activeIndex, portalChapter, progress }: DepthSceneProps) {
             index={index}
             isActive={index === activeIndex}
             key={chapter.id}
+            onEnter={onEnter}
+            onJump={onJump}
             portalChapter={portalChapter}
             progress={progress}
           />
@@ -644,29 +659,33 @@ function PagePlane({
   chapter,
   index,
   isActive,
+  onEnter,
+  onJump,
   portalChapter,
   progress,
 }: {
   chapter: Chapter;
   index: number;
   isActive: boolean;
+  onEnter: (chapter?: Chapter) => void;
+  onJump: (index: number) => void;
   portalChapter: Chapter | null;
   progress: number;
 }) {
-  const texture = useMemo(() => createPanelTexture(chapter, index), [chapter, index]);
+  const { size } = useThree();
   const activeDistance = Math.abs(progress * (chapters.length - 1) - index);
+  const htmlDistanceFactor = size.width < 760 ? 4.2 : 5.08;
   const material = useMemo(
     () =>
       new MeshStandardMaterial({
-        color: "#ffffff",
+        color: chapter.surface,
         emissive: new Color(chapter.accent),
-        emissiveIntensity: 0.05,
-        map: texture,
+        emissiveIntensity: isActive ? 0.08 : 0.035,
         metalness: 0.12,
         roughness: 0.48,
         side: DoubleSide,
       }),
-    [chapter.accent, texture],
+    [chapter.accent, chapter.surface, isActive],
   );
 
   const frameMaterial = useMemo(
@@ -697,10 +716,100 @@ function PagePlane({
           <boxGeometry args={[11.18, 6.98, 0.08]} />
         </mesh>
       </group>
+      <Html
+        center
+        className="corridor-html-wrap"
+        distanceFactor={htmlDistanceFactor}
+        position={[0, 0, 0.16]}
+        transform
+      >
+        <CorridorPage
+          chapter={chapter}
+          index={index}
+          isActive={isActive}
+          onEnter={onEnter}
+          onJump={onJump}
+        />
+      </Html>
       {isActive && !portalChapter && <PortalGlyph chapter={chapter} />}
       <DepthEcho chapter={chapter} index={index} strength={activeDistance} />
       <SideTabs chapter={chapter} />
     </group>
+  );
+}
+
+function CorridorPage({
+  chapter,
+  index,
+  isActive,
+  onEnter,
+  onJump,
+}: {
+  chapter: Chapter;
+  index: number;
+  isActive: boolean;
+  onEnter: (chapter?: Chapter) => void;
+  onJump: (index: number) => void;
+}) {
+  const nextIndex = Math.min(chapters.length - 1, index + 1);
+
+  return (
+    <article
+      aria-hidden={!isActive}
+      className={isActive ? "corridor-page is-active" : "corridor-page"}
+      style={
+        {
+          "--accent": chapter.accent,
+          "--ink": chapter.ink,
+          "--surface": chapter.surface,
+        } as CorridorPageStyle
+      }
+    >
+      <header className="corridor-page-header">
+        <div>
+          <p>{chapter.kicker}</p>
+          <h2>{chapter.title}</h2>
+        </div>
+        <span className="corridor-side">{chapter.side}</span>
+      </header>
+
+      <p className="corridor-page-copy">{chapter.body}</p>
+
+      <div className="corridor-panel-grid">
+        {chapter.room.sections.slice(0, 3).map((section) => (
+          <button
+            className="corridor-mini-panel"
+            disabled={!isActive}
+            key={section.title}
+            onClick={() => onEnter(chapter)}
+            type="button"
+          >
+            <span>{section.eyebrow}</span>
+            <strong>{section.title}</strong>
+          </button>
+        ))}
+      </div>
+
+      <footer className="corridor-page-actions">
+        <button
+          className="corridor-primary"
+          disabled={!isActive}
+          onClick={() => onEnter(chapter)}
+          type="button"
+        >
+          {chapter.side === "left" ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+          <span>{chapter.side === "left" ? "Turn left" : "Turn right"}</span>
+        </button>
+        <button
+          className="corridor-secondary"
+          disabled={!isActive || nextIndex === index}
+          onClick={() => onJump(nextIndex)}
+          type="button"
+        >
+          <span>Next area</span>
+        </button>
+      </footer>
+    </article>
   );
 }
 
