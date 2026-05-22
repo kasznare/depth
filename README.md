@@ -1,16 +1,15 @@
-# Depth Scroll Experiment
+# Software Atlas Prototype
 
-A React and Three.js prototype for a site that scrolls into the page instead of only down it. Normal document scroll drives the camera through a sequence of page-like planes arranged along the Z axis, producing a Prezi-adjacent depth transition while still deploying as a static GitHub Pages site.
+A React prototype for visualizing different kinds of software as semantic node graphs. The stable model is now node-first: software types contain child nodes, child nodes can contain deeper layers, and the depth effect renders the current focus path rather than defining the product concept.
 
 ## Spatial Model
 
-- The main path is a straight scroll-driven corridor through top-level software areas.
-- Corridor panels are real DOM pages mounted into the 3D scene, so the visible cards and actions are clickable instead of baked into textures.
-- Each chapter has a left or right room; entering a room turns the camera sideways instead of zooming deeper.
-- Left and right arrow keys turn into the matching side room; inside a room, the opposite arrow turns back to the corridor.
-- Rooms are bounded work surfaces: once inside, the 3D depth stops and the room page scrolls normally.
-- Hash routes are shareable: `#signal` opens the corridor at a chapter, and `#signal/room` opens that chapter's room.
-- Escape, the close button, or the map's main-path button returns from a room to the corridor.
+- Nodes are stable software objects: types, capabilities, runtimes, interfaces, data, flows, and artifacts.
+- Focus paths are hash-routeable: `#/agent-system/tool-runtime` opens a specific abstraction layer.
+- Selecting a node updates the inspector and current-layer list.
+- Focusing a node with children moves into that node's child canvas.
+- Escape or Backspace moves up one layer; left and right arrows traverse sibling nodes.
+- Different software types use different local graphs: web app, agentic software, distributed system, data platform, game engine, and operating system.
 
 ## Run Locally
 

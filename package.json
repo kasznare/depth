@@ -1,5 +1,5 @@
 {
-  "name": "depth-scroll-experiment",
+  "name": "software-atlas-prototype",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,17 +9,13 @@
     "preview": "node scripts/serve.mjs"
   },
   "dependencies": {
-    "@react-three/drei": "latest",
-    "@react-three/fiber": "latest",
     "lucide-react": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "three": "latest"
+    "react-dom": "latest"
   },
   "devDependencies": {
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "@types/three": "latest",
     "esbuild-wasm": "^0.28.0",
     "typescript": "^5.9.3"
   },
