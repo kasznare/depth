@@ -159,14 +159,42 @@ export default function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || isEditableTarget(event.target)) {
+        return;
+      }
+
       if (event.key === "Escape" && portalChapter) {
+        event.preventDefault();
         exitRoom();
+        return;
+      }
+
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+
+      const direction = event.key === "ArrowLeft" ? "left" : "right";
+
+      if (portalChapter) {
+        const exitDirection = portalChapter.side === "left" ? "right" : "left";
+
+        if (direction === exitDirection) {
+          event.preventDefault();
+          exitRoom();
+        }
+
+        return;
+      }
+
+      if (activeChapter.side === direction) {
+        event.preventDefault();
+        enterRoom(activeChapter);
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [exitRoom, portalChapter]);
+  }, [activeChapter, enterRoom, exitRoom, portalChapter]);
 
   return (
     <div className="app-shell">
@@ -334,6 +362,19 @@ function setRouteHash(
   } else {
     window.history.replaceState(null, "", next);
   }
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return (
+    target.isContentEditable ||
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT"
+  );
 }
 
 function DepthMap({
